@@ -1338,6 +1338,22 @@ async def _run_job(
             )
             return
 
+    if not adopt_existing:
+        try:
+            reviewer = OpenCodeSubagentConfig.from_command(command)
+            if reviewer is not None and reviewer.server_url and not is_openrouter(reviewer.server_url):
+                # Explicit reviewer URLs are user-supplied, even when the
+                # primary endpoint is managed. Keep the HTTPS/public-IP policy.
+                errors = validate_server_url(reviewer.server_url)
+                if errors:
+                    raise ValueError("; ".join(errors))
+        except ValueError as exc:
+            job_store.update_status(
+                job_id, JobStatus.FAILED,
+                error="Reviewer URL validation failed: " + str(exc),
+            )
+            return
+
     oj = OpenshiftJob(job_name=job_id, clean_legacy_pods=adopt_existing)
 
     try:

@@ -535,6 +535,13 @@ can use `openrouter`, requiring `OPENROUTER_API_KEY` in the execution environmen
 (remote jobs receive the existing queue secret). Reviewer servers must already be
 available; this option does not provision a second model server.
 
+The reviewer endpoint's hostname is added to Harbor's agent-phase network
+allowlist; verifier access is unchanged. Inherited reviewer allowances follow
+primary endpoint changes on resume. Explicit reviewer URLs submitted through
+the queue must use HTTPS and resolve to public addresses, and are checked again
+before a new job is launched and before restored trials resume. Wildcard reviewer
+hostnames are rejected.
+
 `model_max_len` defaults to 262000 and uses the same 75% context / 25% output split
 as the primary. Optional `description` and `prompt` customize when to consult the
 reviewer and how it responds. OpenCode exposes the named `reviewer` through its

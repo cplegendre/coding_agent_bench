@@ -159,7 +159,6 @@ class HarborCommandBuilder:
         n_concurrent: int | None = 1,
         n_tasks: int = None,
         model_max_len: int | None = None,
-        opencode_subagent: OpenCodeSubagentConfig | dict[str, Any] | None = None,
         job_name: str = "default",
         agent_version: str = None,
         max_retries: int = None,
@@ -168,6 +167,7 @@ class HarborCommandBuilder:
         agent_timeout_multiplier: float = None,
         thinking: str = None,
         allow_agent_host: list[str] = None,
+        opencode_subagent: OpenCodeSubagentConfig | dict[str, Any] | None = None,
         **kwargs,
     ) -> tuple[list[str], Path]:
         """
@@ -182,6 +182,12 @@ class HarborCommandBuilder:
 
         if opencode_subagent is not None and agent != "opencode":
             raise ValueError("opencode_subagent is only supported for OpenCode")
+
+        if opencode_subagent is not None:
+            opencode_subagent = OpenCodeSubagentConfig.model_validate(opencode_subagent)
+            allow_agent_host = list(dict.fromkeys([
+                *(allow_agent_host or []), opencode_subagent.network_host(server_url)
+            ]))
 
         if model_max_len is None:
             # Keep model-specific limits in the queue's ModelConfig registry rather
