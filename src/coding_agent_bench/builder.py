@@ -5,6 +5,7 @@ from enum import Enum
 import os
 
 from coding_agent_bench.agents import get_agent_config
+from coding_agent_bench.agents.opencode import OpenCodeSubagentConfig
 
 
 class SupportedAgent(str, Enum):
@@ -158,6 +159,7 @@ class HarborCommandBuilder:
         n_concurrent: int | None = 1,
         n_tasks: int = None,
         model_max_len: int | None = None,
+        opencode_subagent: OpenCodeSubagentConfig | dict[str, Any] | None = None,
         job_name: str = "default",
         agent_version: str = None,
         max_retries: int = None,
@@ -178,6 +180,9 @@ class HarborCommandBuilder:
         if environment not in ["docker", "openshift"]:
             raise ValueError(f"Invalid environment: {environment}")
 
+        if opencode_subagent is not None and agent != "opencode":
+            raise ValueError("opencode_subagent is only supported for OpenCode")
+
         if model_max_len is None:
             # Keep model-specific limits in the queue's ModelConfig registry rather
             # than requiring every caller to duplicate them in its request.
@@ -191,6 +196,7 @@ class HarborCommandBuilder:
             model_name=model_name,
             server_url=server_url,
             model_max_len=model_max_len,
+            opencode_subagent=opencode_subagent,
             **kwargs,
         )
 

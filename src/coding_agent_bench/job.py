@@ -121,6 +121,15 @@ class OpenshiftJob:
             {"name": "HARBOR_PARENT", "value": self._pod_name},
             {"name": "CAB_PAUSE_REQUEST_PATH", "value": PAUSE_REQUEST_PATH},
         ]
+        # The reviewer can use OpenRouter while the primary uses a local model.
+        for index, argument in enumerate(command):
+            if argument == "--opencode-subagent":
+                reviewer = json.loads(command[index + 1])
+            elif argument.startswith("--opencode-subagent="):
+                reviewer = json.loads(argument.split("=", 1)[1])
+            else:
+                continue
+            openrouter = openrouter or reviewer.get("server_url") == "openrouter"
         if openrouter:
             env.append(
                 {

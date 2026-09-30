@@ -124,6 +124,10 @@ def _update_agent_endpoint(agent: dict, server_url: str) -> None:
         provider = opencode.get("provider", {}).get("vllm")
         if provider is not None:
             provider.setdefault("options", {})["baseURL"] = api_base
+            if env.get("CAB_OPENCODE_SUBAGENT_INHERIT_ENDPOINT") == "1":
+                reviewer = opencode.get("provider", {}).get("reviewer")
+                if reviewer is not None:
+                    reviewer.setdefault("options", {})["baseURL"] = api_base
             env["OPENCODE_CONFIG_CONTENT"] = json.dumps(opencode)
 
 
